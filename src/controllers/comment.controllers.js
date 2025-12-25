@@ -1,4 +1,4 @@
-import mongoose, { isValidObjectId } from "mongoose"
+import { isValidObjectId } from "mongoose"
 import { Comment } from "../models/comment.models.js"
 import { ApiError } from "../utils/ApiError.js"
 import { ApiResponse } from "../utils/ApiResponse.js"
@@ -21,11 +21,11 @@ const getVideoComments = asyncHandler(async (req, res) => {
     }
 
 
-    const pageNumber = Number(page);
-    const limitNumber = Number(limit);
+    const pageNumber = Math.max(Number(page), 1);
+    const limitNumber = Math.min(Math.max(limit, 1), 50);
     const skip = (pageNumber - 1) * limitNumber;
 
-    const comment = Comment.find({ video: videoId })
+    const comments = await Comment.find({ video: videoId })
         .sort({ createdAt: -1 })
         .skip(skip)
         .limit(limitNumber);
@@ -93,7 +93,7 @@ const updateComment = asyncHandler(async (req, res) => {
 
     const { content } = req.body;
 
-    if (typeof content !== " " || content.trim().length === 0) {
+    if (typeof content !== "string" || content.trim().length === 0) {
         throw new ApiError(400, "Comment content is required");
     }
 
