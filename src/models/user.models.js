@@ -55,7 +55,7 @@ const userSchema = new Schema(
 
 // Cleaner: async pre hook without next()
 userSchema.pre("save", async function () {
-    if (!this.isModified("password")) return;
+    if (!this.isModified("password")) return next();
     this.password = await bcrypt.hash(this.password, SALT_ROUNDS);
 });
 
